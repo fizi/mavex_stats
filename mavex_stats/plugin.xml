@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<e107Plugin name="MAVEX Statistics" lan="LAN_PLUGIN_MAVEX_STATS_NAME" version="0.7.9" date="2026-11-23" compatibility="2.0" installRequired="true">
+  <author name="MAVEX Table Tennis Hall" url="https://mavexterem.hu" />
+  <summary lan="LAN_PLUGIN_MAVEX_STATS_SUMMARY">Independent website statistics and dashboard.</summary>
+  <description lan="LAN_PLUGIN_MAVEX_STATS_DESCRIPTION">Independent visit and page-view measurement with an e107-native administration dashboard.</description>
+  <category>tools</category>
+  <adminLinks>
+    <link url="admin_config.php" description="LAN_PLUGIN_MAVEX_STATS_ADMIN" icon="images/icon_32.png" iconSmall="images/icon_16.png" primary="true">LAN_PLUGIN_MAVEX_STATS_ADMIN</link>
+  </adminLinks>
+  <pluginPrefs>
+    <pref name="tracking_enabled">1</pref>
+    <pref name="count_admin">0</pref>
+    <pref name="max_rows">10</pref>
+    <pref name="retention_days">0</pref>
+    <pref name="view_class">254</pref>
+    <pref name="show_pages">1</pref>
+    <pref name="show_referrers">1</pref>
+    <pref name="show_browsers">1</pref>
+    <pref name="show_os">1</pref>
+    <pref name="show_devices">1</pref>
+    <pref name="show_screens">1</pref>
+    <pref name="show_peaks">1</pref>
+    <pref name="show_trends">1</pref>
+  </pluginPrefs>
+</e107Plugin>

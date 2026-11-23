@@ -1,0 +1,18 @@
+<?php
+/** Independent MAVEX statistics collector bootstrap. */
+if (!defined('e107_INIT')) { exit; }
+if (!defined('USER_AREA') || !USER_AREA) { return; }
+if (defined('ADMIN') && ADMIN) { return; }
+
+$statsPrefs = (array) e107::pref('mavex_stats');
+if (isset($statsPrefs['tracking_enabled']) && empty($statsPrefs['tracking_enabled'])) { return; }
+
+$statsEndpoint = e_PLUGIN_ABS . 'mavex_stats/collect.php';
+$statsScript = "(function(){\n" .
+    "var endpoint=" . json_encode($statsEndpoint) . ";\n" .
+    "var path=window.location.pathname||'/';\n" .
+    "var ref=''; try { if(document.referrer){ref=(new URL(document.referrer)).hostname||'';} } catch(e){}\n" .
+    "var payload={path:path,referrer:ref,screen:(screen&&screen.width?screen.width+'x'+screen.height:'')};\n" .
+    "try { var body=new URLSearchParams(payload); if(navigator.sendBeacon){navigator.sendBeacon(endpoint,body);} else {fetch(endpoint,{method:'POST',body:body,credentials:'same-origin',keepalive:true});} } catch(e){}\n" .
+    "})();";
+e107::js('footer-inline', $statsScript);

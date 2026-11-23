@@ -1,0 +1,100 @@
+/* MAVEX Stats: small, dashboard-scoped refinements; layout and controls use e107/Bootstrap. */
+.mstats-dashboard .mstats-intro{margin-bottom:15px}
+.mstats-dashboard .mstats-intro h2{margin-top:0;font-size:20px;color:inherit}
+.mstats-dashboard .mstats-toolbar{display:flex;align-items:center;justify-content:space-between;gap:15px;flex-wrap:wrap;margin:15px 0;padding:12px 15px;background:#383838;border:1px solid #505050;border-radius:3px;color:#eee}
+.mstats-dashboard .mstats-periods{white-space:nowrap}
+.mstats-dashboard .mstats-periods .btn{margin-left:3px}
+.mstats-dashboard .mstats-periods .btn-primary{border-color:#398cff;box-shadow:inset 0 0 0 1px rgba(57,140,255,.18)}
+.mstats-dashboard .mstats-kpi-row{margin-bottom:15px}
+.mstats-dashboard .mstats-kpi{margin-bottom:0;background:#383838;border-color:#505050;color:#f2f2f2}
+.mstats-dashboard .mstats-kpi .panel-body{min-height:96px;padding:15px 18px}
+.mstats-dashboard .mstats-kpi-icon{float:right;color:#398cff;font-size:21px;opacity:.9}
+.mstats-dashboard .mstats-kpi-label{margin-bottom:7px;color:#c5cbd2;font-size:13px}
+.mstats-dashboard .mstats-kpi-value{color:#fff;font-size:32px;font-weight:700;line-height:1.1;font-variant-numeric:tabular-nums}
+.mstats-dashboard .mstats-panel{margin-bottom:15px;background:#383838;border-color:#505050;color:#eee}
+.mstats-dashboard .mstats-panel>.panel-heading{background:#303030;border-color:#505050;color:#eee}
+.mstats-dashboard .mstats-panel .panel-body{padding:13px 15px}
+.mstats-dashboard .mstats-panel-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:6px}
+.mstats-dashboard .mstats-panel-heading h3{margin:0;color:#fff;font-size:16px;font-weight:600}
+.mstats-dashboard .mstats-panel-heading.compact{padding-bottom:9px;border-bottom:1px solid #555;margin-bottom:0}
+.mstats-dashboard .mstats-section-kicker{margin-bottom:3px;color:#aeb7c2;font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+.mstats-dashboard .mstats-current-period{color:#fff;font-weight:600}
+.mstats-dashboard .mstats-chart-legend{color:#c5cbd2;font-size:12px;white-space:nowrap}
+.mstats-dashboard .mstats-chart-legend i{display:inline-block;width:8px;height:8px;margin-right:5px;background:#398cff;border-radius:2px}
+.mstats-dashboard .mstats-chart{display:flex;align-items:stretch;gap:10px;min-height:165px;padding:8px 5px 0;overflow-x:auto}
+.mstats-dashboard .mstats-day{display:flex;flex:1 1 0;min-width:28px;flex-direction:column;align-items:center;justify-content:flex-end;gap:4px}
+.mstats-dashboard .mstats-day-value{min-height:13px;color:#e5eaf0;font-size:11px;font-variant-numeric:tabular-nums}
+.mstats-dashboard .mstats-day-track{display:flex;align-items:flex-end;justify-content:center;width:100%;height:105px;border-bottom:1px solid #626a73;overflow:hidden}
+.mstats-dashboard .mstats-day-track span{display:block;width:min(55%,28px);background:#287cf0;border-radius:3px 3px 0 0}
+.mstats-dashboard .mstats-day-label,.mstats-dashboard .mstats-day-visitors{color:#b9c1ca;font-size:10px;white-space:nowrap}
+.mstats-dashboard .mstats-chart-caption{padding-top:8px;color:#b9c1ca;font-size:11px}
+.mstats-dashboard .mstats-table{margin-bottom:0;color:#eee}
+.mstats-dashboard .mstats-table>thead>tr>th{padding:9px 10px;background:#292929;border-bottom:1px solid #555;color:#e9edf2}
+.mstats-dashboard .mstats-table>tbody>tr>td{padding:8px 10px;border-top:1px solid #505050;vertical-align:middle}
+.mstats-dashboard .mstats-table>tbody>tr:nth-of-type(odd){background:#414141}
+.mstats-dashboard .mstats-table>tbody>tr:nth-of-type(even){background:#363636}
+.mstats-dashboard .mstats-table code{padding:2px 5px;border-radius:2px;background:#303b49;color:#a9ceff}
+.mstats-dashboard .mstats-bar{height:4px;margin-top:5px;overflow:hidden;border-radius:2px;background:#555}
+.mstats-dashboard .mstats-bar span{display:block;height:100%;background:#287cf0}
+.mstats-dashboard .mstats-privacy-note{margin:12px 0 0}
+@media(max-width:767px){.mstats-dashboard .mstats-toolbar{align-items:flex-start}.mstats-dashboard .mstats-periods{white-space:normal}.mstats-dashboard .mstats-chart{gap:5px}.mstats-dashboard .mstats-kpi{margin-bottom:10px}}
+
+.mstats-dashboard .mstats-day-values{display:flex;justify-content:center;gap:5px;min-height:13px;color:#e5eaf0;font-size:10px;font-variant-numeric:tabular-nums}
+.mstats-dashboard .mstats-day-track{display:flex;align-items:flex-end;justify-content:center;gap:3px}
+.mstats-dashboard .mstats-day-track span{width: min(34%,18px)}
+.mstats-dashboard .mstats-day-track .mstats-bar-views{background:#287cf0}
+.mstats-dashboard .mstats-day-track .mstats-bar-visitors{background:#20b8a6}
+.mstats-dashboard .mstats-chart-legend .mstats-legend-views{background:#287cf0}
+.mstats-dashboard .mstats-chart-legend .mstats-legend-visitors{margin-left:8px;background:#20b8a6}
+
+.mstats-dashboard .mstats-comparison-note{margin:-5px 0 14px;padding:8px 12px;background:#333;border-left:3px solid #287cf0;color:#cbd2da;font-size:12px}
+.mstats-dashboard .mstats-comparison-note strong{color:#fff}
+
+.mstats-dashboard .mstats-peak-summary{display:flex;gap:22px;flex-wrap:wrap;margin-bottom:12px;padding:9px 12px;background:#303030;border-left:3px solid #287cf0;color:#cbd2da;font-size:12px}
+.mstats-dashboard .mstats-peak-summary strong{color:#fff}
+
+.mstats-dashboard .mstats-column-chart{display:block;width:100%;height:auto}
+.mstats-dashboard .mstats-chart-panel-body{padding:10px 12px 5px}
+
+/* 0.5.0 dashboard composition */
+.mstats-dashboard .mstats-titlebar{display:flex;align-items:center;justify-content:space-between;gap:18px;margin:0 0 16px;padding:16px 18px;background:#30343a;border:1px solid #4b5159;border-left:4px solid #287cf0;color:#f4f6f8}
+.mstats-dashboard .mstats-titlebar h2{margin:0 0 5px;color:#fff;font-size:22px;font-weight:700}
+.mstats-dashboard .mstats-title-kicker{margin-bottom:5px;color:#aeb9c6;font-size:10px;font-weight:700;letter-spacing:.1em}
+.mstats-dashboard .mstats-title-subtitle{color:#c5cbd2;font-size:12px}
+.mstats-dashboard .mstats-title-meta{white-space:nowrap}
+.mstats-dashboard .mstats-line-chart-wrap{width:100%;overflow-x:auto}
+.mstats-dashboard .mstats-line-chart{display:block;width:100%;min-width:520px;height:auto}
+.mstats-dashboard .mstats-chart-panel .panel-body{padding:12px 15px 10px}
+.mstats-dashboard .mstats-chart-panel .panel-heading{min-height:54px}
+.mstats-dashboard .mstats-peak-row{margin-top:2px}
+.mstats-dashboard .mstats-peak-row .mstats-panel{height:calc(100% - 15px)}
+.mstats-dashboard .mstats-chart-panel-body{padding:10px 12px 5px!important}
+@media(max-width:767px){
+ .mstats-dashboard .mstats-titlebar{align-items:flex-start;flex-direction:column}
+ .mstats-dashboard .mstats-title-meta{white-space:normal}
+ .mstats-dashboard .mstats-chart-legend{white-space:normal;text-align:right}
+}
+
+
+/* 0.6.0 chart calendar navigation */
+.mstats-dashboard .mstats-chart-navigation{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:0 0 8px}
+.mstats-dashboard .mstats-chart-stepper{display:flex;align-items:center;justify-content:center;gap:9px}
+.mstats-dashboard .mstats-chart-stepper strong{min-width:112px;text-align:center;color:#f2f4f7;font-size:13px;font-variant-numeric:tabular-nums}
+.mstats-dashboard .mstats-chart-views .btn{min-width:58px}
+.mstats-dashboard .mstats-line-chart{max-height:245px}
+@media(max-width:767px){.mstats-dashboard .mstats-chart-navigation{align-items:flex-start;flex-direction:column}.mstats-dashboard .mstats-chart-stepper{width:100%;justify-content:space-between}.mstats-dashboard .mstats-chart-stepper strong{min-width:0}}
+
+/* 0.7.5 settings-page spacing and control sizing */
+.mstats-dashboard{padding-bottom:28px}
+.mstats-dashboard .mstats-settings-form .form-group select{display:inline-block;width:auto;min-width:280px;max-width:100%}
+.mstats-dashboard .mstats-settings-form input[name="max_rows"]{width:260px;max-width:100%}
+.mstats-dashboard .mstats-settings-form .text-right{margin:14px 0 22px}
+.mstats-dashboard .mstats-danger-panel .panel-body form{margin:0;padding:0}
+.mstats-dashboard .mstats-danger-panel .mstats-delete-confirm{display:flex;align-items:center;flex-wrap:wrap;column-gap:20px;row-gap:10px;margin:14px 0 4px;padding:0 4px}
+.mstats-dashboard .mstats-danger-panel .mstats-delete-confirm label{display:inline-flex;align-items:flex-start;gap:7px;margin:0;padding:0;color:inherit;font-weight:400;line-height:20px}
+.mstats-dashboard .mstats-danger-panel .mstats-delete-confirm input[type="checkbox"]{position:static;flex:0 0 auto;margin:3px 0 0}
+.mstats-dashboard .mstats-danger-panel .mstats-delete-confirm button{display:inline-block;margin:0 0 0 2px}
+.mstats-dashboard .mstats-danger-panel{margin-bottom:18px}
+
+/* 0.7.7 delete confirmation control separation */
+@media(max-width:767px){.mstats-dashboard .mstats-danger-panel .mstats-delete-confirm{align-items:flex-start;flex-direction:column;gap:12px}.mstats-dashboard .mstats-danger-panel .mstats-delete-confirm button{margin-left:0}}
