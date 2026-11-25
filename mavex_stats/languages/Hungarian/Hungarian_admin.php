@@ -117,3 +117,14 @@ if (!defined('LAN_MAVEX_STATS_RETENTION_HELP')) define('LAN_MAVEX_STATS_RETENTIO
 if (!defined('LAN_MAVEX_STATS_BOT_FILTER')) define('LAN_MAVEX_STATS_BOT_FILTER', 'Botok és keresőrobotok szűrése');
 if (!defined('LAN_MAVEX_STATS_BOT_FILTER_HELP')) define('LAN_MAVEX_STATS_BOT_FILTER_HELP', 'Az ismert botokat User-Agent azonosító alapján kiszűrjük. Nem garantálható minden automatizált kliens felismerése, és a User-Agent érték hamisítható.');
 if (!defined('LAN_MAVEX_STATS_RETENTION_LABEL')) define('LAN_MAVEX_STATS_RETENTION_LABEL', 'Automatikus adatmegőrzés');
+// 0.8.0 – reporting period and chart navigation labels.
+if (!defined('LAN_MAVEX_STATS_PERIOD_TODAY')) define('LAN_MAVEX_STATS_PERIOD_TODAY', 'Ma');
+if (!defined('LAN_MAVEX_STATS_PERIOD_7_DAYS')) define('LAN_MAVEX_STATS_PERIOD_7_DAYS', '7 nap');
+if (!defined('LAN_MAVEX_STATS_PERIOD_30_DAYS')) define('LAN_MAVEX_STATS_PERIOD_30_DAYS', '30 nap');
+if (!defined('LAN_MAVEX_STATS_PERIOD_90_DAYS')) define('LAN_MAVEX_STATS_PERIOD_90_DAYS', '90 nap');
+if (!defined('LAN_MAVEX_STATS_PERIOD_ALL')) define('LAN_MAVEX_STATS_PERIOD_ALL', 'Összes');
+// 0.8.0 – device type labels.
+if (!defined('LAN_MAVEX_STATS_DEVICE_DESKTOP')) define('LAN_MAVEX_STATS_DEVICE_DESKTOP', 'Asztali gép');
+if (!defined('LAN_MAVEX_STATS_DEVICE_MOBILE')) define('LAN_MAVEX_STATS_DEVICE_MOBILE', 'Mobil');
+if (!defined('LAN_MAVEX_STATS_DEVICE_TABLET')) define('LAN_MAVEX_STATS_DEVICE_TABLET', 'Tablet');
+if (!defined('LAN_MAVEX_STATS_DEVICE_UNKNOWN')) define('LAN_MAVEX_STATS_DEVICE_UNKNOWN', 'Nem azonosított');

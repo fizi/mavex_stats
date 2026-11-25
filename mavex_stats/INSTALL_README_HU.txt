@@ -1,4 +1,4 @@
-MAVEX STATS – 0.7.9
+MAVEX STATS – 0.8.1
 
 Cél
 ---
@@ -34,14 +34,28 @@ Funkciók
 - A saját domain belső hivatkozóként való megjelenítése kiszűrve.
 - A napi dátumléptetés naptári napok szerint történik.
 
-Telepítés és tesztelés
+0.8.1 – Publikus statisztikai oldal véglegesített általános megjelenése
+------------------------------------------------------------------------
+- Egységes kék színvilágú publikus oldal, új grafikus fejléccel és kártyákkal.
+- Látogatók, oldalmegtekintések és regisztrált tagok KPI-kártyái.
+- Napi (30 nap), havi (12 hónap) és éves (5 év) forgalmi grafikon.
+- Eszközök, böngészők és operációs rendszerek összesítése.
+- Hírek és látható e107 fejezetek dinamikus megjelenítése adatbázisból.
+- A publikus oldal magyar és angol feliratai külön `Hungarian_front.php` és `English_front.php` fájlokba kerültek.
+- Az adminisztráció saját nyelvi fájljai és részletes dashboardja változatlan maradt.
+- A publikus oldal nem függ a HITS plugintól.
+- A meglévő eseménytábla és adatgyűjtés nem változott; adatbázis-migráció nem szükséges.
+
+Telepítés és frissítés
 ----------------------
-- Készíts biztonsági másolatot a jelenlegi mavex_stats plugin könyvtárról.
-- A ZIP-ben található mavex_stats könyvtár tartalmával cseréld le a jelenlegi pluginfájlokat.
-- A meglévő adatbázistáblát NE töröld; adatbázis-migráció erre a verzióra nem szükséges.
-- Ellenőrizd az adminfelületet mind az öt időszakválasztóval.
-- Ellenőrizd, hogy a korábbi események és számlálók megmaradtak.
-- A telepítést localhoston teszteld; éles szerverre csak teljes ellenőrzés után kerüljön.
+- Készíts biztonsági másolatot a `mavex_stats` plugin könyvtárról és az adatbázisról.
+- A ZIP-ben található `mavex_stats` könyvtárat másold az `e107_plugins/` mappába, a meglévő fájlok felülírásával.
+- A `mavex_stats_events` adatbázistáblát és a korábbi eseményadatokat NE töröld.
+- Az e107 Admin > Adatbázis részen futtasd a pluginmappák vizsgálatát, hogy az ütemezett feladat elérhető legyen.
+- Az Admin > Eszközök > Ütemezett feladatok részen engedélyezd és ütemezd napi futásra az automatikus adatmegőrzési feladatot, ha használni szeretnéd.
+- A MAVEX Stats > Beállítások oldalon ellenőrizd az adatgyűjtési, hozzáférési és adatmegőrzési beállításokat.
+- A publikus oldal címe: `e107_plugins/mavex_stats/stats.php`. Ellenőrizd a hozzáférést a beállított felhasználói osztállyal.
+- A frissítés nem igényel adatbázis-migrációt; a korábbi eseményadatok megmaradnak.
 
 Adatvédelem
 -----------

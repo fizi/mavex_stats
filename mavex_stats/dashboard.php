@@ -172,34 +172,29 @@ try {
         $dailyStats[] = array('day' => $key, 'label' => $label, 'views' => $chartMap[$key]['views'] ?? 0, 'visitors' => $chartMap[$key]['visitors'] ?? 0);
     }
     // Weekly and monthly trend summaries from the latest 180 days.
+    // Aggregate views and distinct visitors in SQL instead of loading every event into PHP.
     $trendStart = strtotime('-179 days', $todayStart);
     $trendWhere = 'event_time >= ' . (int) $trendStart . ' AND event_time <= ' . (int) $now;
-    $sql->db_Select('mavex_stats_events', 'DATE(FROM_UNIXTIME(event_time)) AS event_day, COUNT(*) AS views, COUNT(DISTINCT visitor_hash) AS visitors', $trendWhere . ' GROUP BY event_day ORDER BY event_day ASC');
     $weeklyTrend = array();
     $monthlyTrend = array();
+
+    $weeklySql = "DATE_FORMAT(FROM_UNIXTIME(event_time), '%x-%v') AS period_key, COUNT(*) AS views, COUNT(DISTINCT visitor_hash) AS visitors";
+    $sql->db_Select('mavex_stats_events', $weeklySql, $trendWhere . ' GROUP BY period_key ORDER BY period_key ASC');
     while ($row = $sql->db_Fetch()) {
-        $dayTs = strtotime((string) $row['event_day']);
-        $weekKey = date('o-W', $dayTs);
-        $monthKey = date('Y-m', $dayTs);
-        if (!isset($weeklyTrend[$weekKey])) { $weeklyTrend[$weekKey] = array('views' => 0, 'visitors' => array()); }
-        if (!isset($monthlyTrend[$monthKey])) { $monthlyTrend[$monthKey] = array('views' => 0, 'visitors' => array()); }
-        $weeklyTrend[$weekKey]['views'] += (int) $row['views'];
-        $monthlyTrend[$monthKey]['views'] += (int) $row['views'];
-    }
-    // Use distinct visitor counts grouped by period for accurate rollups.
-    $sql->db_Select('mavex_stats_events', 'visitor_hash, event_time', $trendWhere);
-    while ($row = $sql->db_Fetch()) {
-        $dayTs = (int) $row['event_time'];
-        $visitorHash = (string) $row['visitor_hash'];
-        $weekKey = date('o-W', $dayTs);
-        $monthKey = date('Y-m', $dayTs);
-        if ($visitorHash !== '') {
-            $weeklyTrend[$weekKey]['visitors'][$visitorHash] = true;
-            $monthlyTrend[$monthKey]['visitors'][$visitorHash] = true;
+        $periodKey = (string) ($row['period_key'] ?? '');
+        if ($periodKey !== '') {
+            $weeklyTrend[$periodKey] = array('views' => (int) $row['views'], 'visitors' => (int) $row['visitors']);
         }
     }
-    foreach ($weeklyTrend as $key => $item) { $weeklyTrend[$key]['visitors'] = count($item['visitors']); }
-    foreach ($monthlyTrend as $key => $item) { $monthlyTrend[$key]['visitors'] = count($item['visitors']); }
+
+    $monthlySql = "DATE_FORMAT(FROM_UNIXTIME(event_time), '%Y-%m') AS period_key, COUNT(*) AS views, COUNT(DISTINCT visitor_hash) AS visitors";
+    $sql->db_Select('mavex_stats_events', $monthlySql, $trendWhere . ' GROUP BY period_key ORDER BY period_key ASC');
+    while ($row = $sql->db_Fetch()) {
+        $periodKey = (string) ($row['period_key'] ?? '');
+        if ($periodKey !== '') {
+            $monthlyTrend[$periodKey] = array('views' => (int) $row['views'], 'visitors' => (int) $row['visitors']);
+        }
+    }
 
     // Browser, device and screen-size summaries use fields already collected by the plugin.
     $sql->db_Select('mavex_stats_events', 'user_agent, screen_size, COUNT(*) AS hits', $where . ' GROUP BY user_agent, screen_size');
@@ -217,10 +212,10 @@ try {
         else { $browser = 'Egyéb / nem azonosított'; }
         $browserStats[$browser] = ($browserStats[$browser] ?? 0) + $hits;
 
-        if (preg_match('/iPad|Tablet|PlayBook|Silk/i', $ua) || (preg_match('/Android/i', $ua) && !preg_match('/Mobile/i', $ua))) { $device = 'Tablet'; }
-        elseif (preg_match('/Mobile|iPhone|iPod|Windows Phone/i', $ua) || (preg_match('/Android/i', $ua) && preg_match('/Mobile/i', $ua))) { $device = 'Mobil'; }
-        elseif ($ua !== '') { $device = 'Asztali gép'; }
-        else { $device = 'Nem azonosított'; }
+        if (preg_match('/iPad|Tablet|PlayBook|Silk/i', $ua) || (preg_match('/Android/i', $ua) && !preg_match('/Mobile/i', $ua))) { $device = LAN_MAVEX_STATS_DEVICE_TABLET; }
+        elseif (preg_match('/Mobile|iPhone|iPod|Windows Phone/i', $ua) || (preg_match('/Android/i', $ua) && preg_match('/Mobile/i', $ua))) { $device = LAN_MAVEX_STATS_DEVICE_MOBILE; }
+        elseif ($ua !== '') { $device = LAN_MAVEX_STATS_DEVICE_DESKTOP; }
+        else { $device = LAN_MAVEX_STATS_DEVICE_UNKNOWN; }
         $deviceStats[$device] = ($deviceStats[$device] ?? 0) + $hits;
 
         if (preg_match('/Windows NT 10/i', $ua)) { $os = 'Windows 10/11'; }
@@ -250,8 +245,8 @@ try {
 
 $fmt = static function ($number) { return number_format((int) $number, 0, ',', ' '); };
 $h = static function ($value) { return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8'); };
-$periodLabels = array('today' => 'Ma', '7' => '7 nap', '30' => '30 nap', '90' => '90 nap', 'all' => 'Összes');
-$periodLinks = '<nav class="mstats-periods btn-group" aria-label="Időszak kiválasztása">';
+$periodLabels = array('today' => LAN_MAVEX_STATS_PERIOD_TODAY, '7' => LAN_MAVEX_STATS_PERIOD_7_DAYS, '30' => LAN_MAVEX_STATS_PERIOD_30_DAYS, '90' => LAN_MAVEX_STATS_PERIOD_90_DAYS, 'all' => LAN_MAVEX_STATS_PERIOD_ALL);
+$periodLinks = '<nav class="mstats-periods btn-group" aria-label="' . LAN_MAVEX_STATS_PERIOD_SELECT . '">';
 foreach ($periodLabels as $key => $label) {
     $active = $period === $key ? ' is-active' : '';
     $current = $period === $key ? ' aria-current="page"' : '';
@@ -324,7 +319,7 @@ $chart .= $viewDots . $visitorDots . $chartLabels . '</svg>';
 
 $changeLabel = static function ($current, $previous) {
     if ($previous === null) { return ''; }
-    if ((int) $previous === 0) { return (int) $current > 0 ? 'Új' : '0%'; }
+    if ((int) $previous === 0) { return (int) $current > 0 ? LAN_MAVEX_STATS_NEW : '0%'; }
     $change = (($current - $previous) / $previous) * 100;
     return ($change > 0 ? '+' : '') . number_format($change, 1, ',', ' ') . '%';
 };
@@ -340,7 +335,7 @@ if ($weeklyRows === '') { $weeklyRows = '<tr><td colspan="3" class="text-muted t
 if ($monthlyRows === '') { $monthlyRows = '<tr><td colspan="3" class="text-muted text-center">Még nincs elegendő adat.</td></tr>'; }
 $comparisonHtml = '';
 if ($comparison['views'] !== null) {
-    $comparisonHtml = '<div class="mstats-comparison-note">Előző időszakhoz képest: oldalmegtekintés <strong>' . $h($changeLabel($periodEvents, $comparison['views'])) . '</strong> · egyedi látogató <strong>' . $h($changeLabel($periodVisitors, $comparison['visitors'])) . '</strong></div>';
+    $comparisonHtml = '<div class="mstats-comparison-note">' . LAN_MAVEX_STATS_COMPARISON_VIEWS_PREFIX . '<strong>' . $h($changeLabel($periodEvents, $comparison['views'])) . '</strong>' . LAN_MAVEX_STATS_COMPARISON_VISITORS_PREFIX . '<strong>' . $h($changeLabel($periodVisitors, $comparison['visitors'])) . '</strong></div>';
 }
 $pageRows = '';
 if ($topPages) {
@@ -351,7 +346,7 @@ if ($topPages) {
     }
 } else { $pageRows = '<tr><td colspan="3" class="text-muted text-center">' . LAN_MAVEX_STATS_NO_DATA . '</td></tr>'; }
 
-$weekdayNames = array(1 => 'Vasárnap', 2 => 'Hétfő', 3 => 'Kedd', 4 => 'Szerda', 5 => 'Csütörtök', 6 => 'Péntek', 7 => 'Szombat');
+$weekdayNames = array(1 => LAN_MAVEX_STATS_SUNDAY, 2 => LAN_MAVEX_STATS_MONDAY, 3 => LAN_MAVEX_STATS_TUESDAY, 4 => LAN_MAVEX_STATS_WEDNESDAY, 5 => LAN_MAVEX_STATS_THURSDAY, 6 => LAN_MAVEX_STATS_FRIDAY, 7 => LAN_MAVEX_STATS_SATURDAY);
 $buildColumnChart = static function ($labels, $values, $ariaLabel) use ($fmt) {
     $count = count($labels);
     $width = 760;
@@ -411,8 +406,8 @@ $hourChart = $buildColumnChart($hourLabels, $hourValues, 'Forgalom a nap 24 ór�
 $peakWeekday = $weekdayStats ? array_search(max($weekdayStats), $weekdayStats, true) : null;
 $peakHour = $hourStats ? array_search(max($hourStats), $hourStats, true) : null;
 $peakSummary = '<div class="mstats-peak-summary">';
-$peakSummary .= '<span>Legforgalmasabb nap: <strong>' . ($peakWeekday !== null ? $h($weekdayNames[$peakWeekday]) : '—') . '</strong></span>';
-$peakSummary .= '<span>Legforgalmasabb óra: <strong>' . ($peakHour !== null ? sprintf('%02d:00–%02d:59', $peakHour, $peakHour) : '—') . '</strong></span>';
+$peakSummary .= '<span>' . LAN_MAVEX_STATS_BUSIEST_DAY_PREFIX . ' <strong>' . ($peakWeekday !== null ? $h($weekdayNames[$peakWeekday]) : '—') . '</strong></span>';
+$peakSummary .= '<span>' . LAN_MAVEX_STATS_BUSIEST_HOUR_PREFIX . ' <strong>' . ($peakHour !== null ? sprintf('%02d:00–%02d:59', $peakHour, $peakHour) : '—') . '</strong></span>';
 $peakSummary .= '</div>';
 
 $refRows = '';
@@ -422,8 +417,8 @@ if ($topReferrers) {
     }
 } else { $refRows = '<tr><td colspan="2" class="text-muted text-center">Nincs külső hivatkozás adat.</td></tr>'; }
 
-$chartViewLabels = array('day' => 'Nap', 'month' => 'Hónap', 'year' => 'Év');
-$chartViewLinks = '<div class="mstats-chart-views btn-group" role="group" aria-label="Grafikon nézete">';
+$chartViewLabels = array('day' => LAN_MAVEX_STATS_DAY, 'month' => LAN_MAVEX_STATS_MONTH, 'year' => LAN_MAVEX_STATS_YEAR);
+$chartViewLinks = '<div class="mstats-chart-views btn-group" role="group" aria-label="' . LAN_MAVEX_STATS_CHART_VIEW . '">';
 foreach ($chartViewLabels as $viewKey => $viewLabel) {
     $viewActive = $chartView === $viewKey;
     // Changing granularity starts at the current day/month/year, not at the
@@ -431,9 +426,9 @@ foreach ($chartViewLabels as $viewKey => $viewLabel) {
     $chartViewLinks .= '<a class="btn btn-sm ' . ($viewActive ? 'btn-primary' : 'btn-default') . '" href="' . $h($chartUrl($viewKey, date('Y-m-d', $now))) . '"' . ($viewActive ? ' aria-current="page"' : '') . '>' . $viewLabel . '</a>';
 }
 $chartViewLinks .= '</div>';
-$chartStepName = $chartView === 'day' ? 'nap' : ($chartView === 'month' ? 'hónap' : 'év');
+$chartStepName = $chartView === 'day' ? LAN_MAVEX_STATS_DAY_LOWER : ($chartView === 'month' ? LAN_MAVEX_STATS_MONTH_LOWER : LAN_MAVEX_STATS_YEAR_LOWER);
 $chartNavigation = '<div class="mstats-chart-navigation">' . $chartViewLinks;
-$chartNavigation .= '<div class="mstats-chart-stepper"><a class="btn btn-sm btn-default" href="' . $h($chartUrl($chartView, $chartPrevDate->format('Y-m-d'))) . '" aria-label="Előző ' . $chartStepName . '">&lsaquo; Előző ' . $chartStepName . '</a>';
+$chartNavigation .= '<div class="mstats-chart-stepper"><a class="btn btn-sm btn-default" href="' . $h($chartUrl($chartView, $chartPrevDate->format('Y-m-d'))) . '" aria-label="' . LAN_MAVEX_STATS_PREVIOUS_PREFIX . $chartStepName . '">&lsaquo; ' . LAN_MAVEX_STATS_PREVIOUS_PREFIX . $chartStepName . '</a>';
 $chartNavigation .= '<strong>' . $h($chartHeading) . '</strong>';
 $chartCurrentHeading = $chartView === 'day' ? date('Y-m-d', $now) : ($chartView === 'month' ? date('Y-m-01', $now) : date('Y-01-01', $now));
 $chartCurrentUrl = $chartUrl($chartView, $chartCurrentHeading);
@@ -445,22 +440,22 @@ if ($chartView === 'day') {
     $isCurrentChartPeriod = $chartDateObject->format('Y') === date('Y', $now);
 }
 if (!$isCurrentChartPeriod) {
-    $chartNavigation .= '<a class="btn btn-sm btn-default" href="' . $h($chartCurrentUrl) . '">Aktuális</a>';
+    $chartNavigation .= '<a class="btn btn-sm btn-default" href="' . $h($chartCurrentUrl) . '">' . LAN_MAVEX_STATS_CURRENT . '</a>';
 }
 if ($chartCanGoNext) {
-    $chartNavigation .= '<a class="btn btn-sm btn-default" href="' . $h($chartUrl($chartView, $chartNextDate->format('Y-m-d'))) . '" aria-label="Következő ' . $chartStepName . '">Következő ' . $chartStepName . ' &rsaquo;</a>';
+    $chartNavigation .= '<a class="btn btn-sm btn-default" href="' . $h($chartUrl($chartView, $chartNextDate->format('Y-m-d'))) . '" aria-label="' . LAN_MAVEX_STATS_NEXT_PREFIX . $chartStepName . '">' . LAN_MAVEX_STATS_NEXT_PREFIX . $chartStepName . ' &rsaquo;</a>';
 } else {
-    $chartNavigation .= '<button type="button" class="btn btn-sm btn-default" disabled>Következő ' . $chartStepName . ' &rsaquo;</button>';
+    $chartNavigation .= '<button type="button" class="btn btn-sm btn-default" disabled>' . LAN_MAVEX_STATS_NEXT_PREFIX . $chartStepName . ' &rsaquo;</button>';
 }
 $chartNavigation .= '</div></div>';
 
 $text = '<div class="mstats-dashboard">';
 $text .= '<div class="mstats-titlebar"><div><div class="mstats-title-kicker">MAVEX TEREM · WEBANALITIKA</div><h2>' . LAN_MAVEX_STATS_DASHBOARD . '</h2><div class="mstats-title-subtitle">' . LAN_MAVEX_STATS_DASHBOARD_INTRO . '</div></div><div class="mstats-title-meta"><span class="label label-default">' . LAN_MAVEX_STATS_TRACKING_SINCE . ': ' . ($trackingStarted ? $h($trackingStarted) : LAN_MAVEX_STATS_NOT_STARTED) . '</span></div></div>';
-$text .= '<div class="well mstats-toolbar"><div><div class="mstats-section-kicker">KIMUTATÁSI IDŐSZAK</div><div class="mstats-current-period">' . $periodLabels[$period] . '</div></div>' . $periodLinks . '</div>';
+$text .= '<div class="well mstats-toolbar"><div><div class="mstats-section-kicker">' . LAN_MAVEX_STATS_REPORTING_PERIOD . '</div><div class="mstats-current-period">' . $periodLabels[$period] . '</div></div>' . $periodLinks . '</div>';
 $text .= '<div class="row mstats-kpi-row">' . $cards . '</div>' . $comparisonHtml;
 $chartCaption = 'Bontásban látható az oldalmegtekintések és az egyedi látogatók száma.';
 $chartTitle = 'Látogatottság';
-$text .= '<section class="panel mstats-panel mstats-chart-panel"><div class="panel-heading mstats-panel-heading"><div><div class="mstats-section-kicker">FORGALOM IDŐSZAK SZERINT</div><h3>' . $chartTitle . '</h3></div><span class="mstats-chart-legend"><i class="mstats-legend-views"></i> Oldalmegtekintések &nbsp; <i class="mstats-legend-visitors"></i> Egyedi látogatók</span></div><div class="panel-body">' . $chartNavigation . '<div class="mstats-line-chart-wrap">' . $chart . '</div><div class="mstats-chart-caption">' . $chartCaption . '</div></div></section>';
+$text .= '<section class="panel mstats-panel mstats-chart-panel"><div class="panel-heading mstats-panel-heading"><div><div class="mstats-section-kicker">FORGALOM IDŐSZAK SZERINT</div><h3>' . $chartTitle . '</h3></div><span class="mstats-chart-legend"><i class="mstats-legend-views"></i> ' . LAN_MAVEX_STATS_PAGE_VIEWS . ' &nbsp; <i class="mstats-legend-visitors"></i> ' . LAN_MAVEX_STATS_UNIQUE_VISITORS . '</span></div><div class="panel-body">' . $chartNavigation . '<div class="mstats-line-chart-wrap">' . $chart . '</div><div class="mstats-chart-caption">' . $chartCaption . '</div></div></section>';
 if (!empty($mstatsPrefs['show_peaks'])) { $text .= '<div class="row mstats-peak-row"><div class="col-xs-12">' . $peakSummary . '</div>';
 $text .= '<div class="col-xs-12 col-md-6"><div class="panel mstats-panel"><div class="panel-heading mstats-panel-heading compact"><h3>Forgalom a hét napjai szerint</h3></div><div class="panel-body mstats-chart-panel-body">' . $weekdayChart . '</div></div></div>';
 $text .= '<div class="col-xs-12 col-md-6"><div class="panel mstats-panel"><div class="panel-heading mstats-panel-heading compact"><h3>Forgalom a nap 24 órájában</h3></div><div class="panel-body mstats-chart-panel-body">' . $hourChart . '</div></div></div></div>';
@@ -579,7 +574,16 @@ $mstatsUiTranslations = array(
     'Az eseményadatok egyetlen közös táblában tárolódnak, ezért külön kategóriák törlése nem biztonságos: például a böngészőadatok külön törlése a látogatási események többi adatát is érintené. Jelenleg ezért a teljes statisztikai adathalmaz törlése érhető el.' => LAN_MAVEX_STATS_DELETE_INFO,
     'Beállítások' => LAN_MAVEX_STATS_SETTINGS_MENU
 );
-$text = strtr($text, $mstatsUiTranslations);
+$text = preg_replace_callback('/>([^<>]+)</u', static function ($matches) use ($mstatsUiTranslations) {
+    $nodeText = $matches[1];
+    $trimmed = trim($nodeText);
+    if ($trimmed !== '' && array_key_exists($trimmed, $mstatsUiTranslations)) {
+        $leading = substr($nodeText, 0, strlen($nodeText) - strlen(ltrim($nodeText)));
+        $trailing = substr($nodeText, strlen(rtrim($nodeText)));
+        return '>' . $leading . $mstatsUiTranslations[$trimmed] . $trailing . '<';
+    }
+    return $matches[0];
+}, $text);
 
 $ns = e107::getRender();
 $ns->tablerender(LAN_MAVEX_STATS_ADMIN_TITLE, $text);

@@ -135,8 +135,17 @@ $mstatsSettingsTranslations = array(
     'Az eseményadatok egyetlen közös táblában tárolódnak, ezért külön kategóriák törlése nem biztonságos: például a böngészőadatok külön törlése a látogatási események többi adatát is érintené. Jelenleg ezért a teljes statisztikai adathalmaz törlése érhető el.' => LAN_MAVEX_STATS_DELETE_INFO,
     'Beállítások' => LAN_MAVEX_STATS_SETTINGS_MENU
 );
-$text = strtr($text, $mstatsSettingsTranslations);
+$text = preg_replace_callback('/>([^<>]+)</u', static function ($matches) use ($mstatsSettingsTranslations) {
+    $nodeText = $matches[1];
+    $trimmed = trim($nodeText);
+    if ($trimmed !== '' && array_key_exists($trimmed, $mstatsSettingsTranslations)) {
+        $leading = substr($nodeText, 0, strlen($nodeText) - strlen(ltrim($nodeText)));
+        $trailing = substr($nodeText, strlen(rtrim($nodeText)));
+        return '>' . $leading . $mstatsSettingsTranslations[$trimmed] . $trailing . '<';
+    }
+    return $matches[0];
+}, $text);
 
-e107::getRender()->tablerender('MAVEX Stats – Beállítások', $text);
+e107::getRender()->tablerender(LAN_MAVEX_STATS_SETTINGS_TITLE, $text);
 require_once(e_ADMIN . 'footer.php');
 exit;

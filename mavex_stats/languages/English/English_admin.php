@@ -117,3 +117,14 @@ if (!defined('LAN_MAVEX_STATS_RETENTION_HELP')) define('LAN_MAVEX_STATS_RETENTIO
 if (!defined('LAN_MAVEX_STATS_BOT_FILTER')) define('LAN_MAVEX_STATS_BOT_FILTER', 'Bot and crawler filtering');
 if (!defined('LAN_MAVEX_STATS_BOT_FILTER_HELP')) define('LAN_MAVEX_STATS_BOT_FILTER_HELP', 'Known bots are excluded using their User-Agent string. This cannot identify every automated client, and User-Agent values can be spoofed.');
 if (!defined('LAN_MAVEX_STATS_RETENTION_LABEL')) define('LAN_MAVEX_STATS_RETENTION_LABEL', 'Automatic data retention');
+// 0.8.0 – reporting period and chart navigation labels.
+if (!defined('LAN_MAVEX_STATS_PERIOD_TODAY')) define('LAN_MAVEX_STATS_PERIOD_TODAY', 'Today');
+if (!defined('LAN_MAVEX_STATS_PERIOD_7_DAYS')) define('LAN_MAVEX_STATS_PERIOD_7_DAYS', '7 days');
+if (!defined('LAN_MAVEX_STATS_PERIOD_30_DAYS')) define('LAN_MAVEX_STATS_PERIOD_30_DAYS', '30 days');
+if (!defined('LAN_MAVEX_STATS_PERIOD_90_DAYS')) define('LAN_MAVEX_STATS_PERIOD_90_DAYS', '90 days');
+if (!defined('LAN_MAVEX_STATS_PERIOD_ALL')) define('LAN_MAVEX_STATS_PERIOD_ALL', 'All');
+// 0.8.0 – device type labels.
+if (!defined('LAN_MAVEX_STATS_DEVICE_DESKTOP')) define('LAN_MAVEX_STATS_DEVICE_DESKTOP', 'Desktop');
+if (!defined('LAN_MAVEX_STATS_DEVICE_MOBILE')) define('LAN_MAVEX_STATS_DEVICE_MOBILE', 'Mobile');
+if (!defined('LAN_MAVEX_STATS_DEVICE_TABLET')) define('LAN_MAVEX_STATS_DEVICE_TABLET', 'Tablet');
+if (!defined('LAN_MAVEX_STATS_DEVICE_UNKNOWN')) define('LAN_MAVEX_STATS_DEVICE_UNKNOWN', 'Unidentified');

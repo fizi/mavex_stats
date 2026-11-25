@@ -1,5 +1,8 @@
 <?php
 /** Public, minimal page-view collector. Does not store IP addresses. */
+// This endpoint is a background beacon, not a page visit. Do not let it
+// enter e107's online-user tracking or flood-protection page-hit counter.
+$_E107['no_online'] = true;
 require_once('../../class2.php');
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !defined('e107_INIT')) {
@@ -22,10 +25,35 @@ if (empty($statsPrefs['count_admin']) && function_exists('getperms') && getperms
     exit;
 }
 
-$path = isset($_POST['path']) ? (string) $_POST['path'] : '/';
-$path = parse_url($path, PHP_URL_PATH);
-$path = is_string($path) ? substr(preg_replace('/[^\pL\pN\/_\-.%]/u', '', $path), 0, 500) : '/';
+$rawPath = isset($_POST['path']) ? (string) $_POST['path'] : '/';
+$parsedPath = parse_url($rawPath);
+$path = is_array($parsedPath) && isset($parsedPath['path']) ? (string) $parsedPath['path'] : '/';
+$path = substr(preg_replace('/[^\pL\pN\/_\-.%]/u', '', $path), 0, 400);
 if ($path === '') { $path = '/'; }
+
+// Keep ordinary query parameters so non-SEF e107 pages remain distinguishable.
+// Activation and password-reset endpoints may contain private one-time tokens;
+// their query strings are deliberately never stored.
+$queryString = '';
+$scriptName = strtolower(basename($path));
+if (!in_array($scriptName, array('signup.php', 'fpw.php'), true) && !empty($parsedPath['query'])) {
+    $queryParams = array();
+    parse_str((string) $parsedPath['query'], $parsedParams);
+    $blockedParamPattern = '/(pass(word)?|token|secret|session|sessid|sid|activation|activate|reset|confirm|auth|csrf|nonce)/i';
+    $paramCount = 0;
+    foreach ($parsedParams as $paramKey => $paramValue) {
+        if ($paramCount >= 20 || preg_match($blockedParamPattern, (string) $paramKey)) { continue; }
+        if (!is_scalar($paramValue)) { continue; }
+        $safeKey = substr((string) $paramKey, 0, 80);
+        $safeValue = substr((string) $paramValue, 0, 160);
+        if ($safeKey === '') { continue; }
+        $queryParams[$safeKey] = $safeValue;
+        $paramCount++;
+    }
+    if ($queryParams) { $queryString = http_build_query($queryParams, '', '&', PHP_QUERY_RFC3986); }
+}
+if ($queryString !== '') { $path .= '?' . $queryString; }
+$path = substr($path, 0, 500);
 
 $referrer = isset($_POST['referrer']) ? strtolower((string) $_POST['referrer']) : '';
 $referrer = preg_replace('/[^a-z0-9.\-:]/', '', $referrer);
